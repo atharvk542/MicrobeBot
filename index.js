@@ -1,30 +1,29 @@
-require("dotenv").config();
-const express = require("express");
+require('dotenv').config();
+const express = require('express');
 const app = express();
 const token = process.env.TOKEN;
 
 app.listen(3000, () => {
-    console.log("running");
+    console.log('running');
 });
 
 //responds when the root directory is requested through HTTPS
 //keeps bot active when pinged through uptimerobot
-app.get("/", (req, res) => {
-    res.send("please work");
+app.get('/', (req, res) => {
+    res.send('please work');
 });
 
 //creates discord constant and sets up permissions
-const Discord = require("discord.js");
-const { Client, Collection, Events, GatewayIntentBits, MessageFlags } = require("discord.js");
+const { Client, Collection, Events, GatewayIntentBits, MessageFlags } = require('discord.js');
 const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, 
         GatewayIntentBits.MessageContent],
 });
 
-//responds with "hi" when someone says "hey" using messageCreate event  
-client.on("messageCreate", message => {
-    if(message.content === "hey") {
-        message.channel.send("hi");
+//responds with 'hi' when someone says 'hey' using messageCreate event  
+client.on('messageCreate', message => {
+    if(message.content === 'hey') {
+        message.channel.send('hi');		
     }
 })
 
