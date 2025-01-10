@@ -115,6 +115,7 @@ module.exports = {
                         const incorrectEmbed = incorrectAnswers();
                         await interaction.followUp({ embeds: [correctEmbed]});
                         await interaction.followUp({ embeds: [incorrectEmbed]});
+                        collector.stop()
                         resolve();
                         return;
                     }
@@ -173,6 +174,7 @@ module.exports = {
                             const incorrectEmbed = incorrectAnswers();
                             await interaction.followUp({ embeds: [correctEmbed]});
                             await interaction.followUp({ embeds: [incorrectEmbed]});
+                            collector.stop()
                             resolve();
                             return;
                         }

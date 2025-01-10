@@ -59,6 +59,7 @@ module.exports = {
 
                 if (message.content.trim().toLowerCase() === 'stop' && message.author.id === interaction.user.id) {
                     await interaction.followUp('Stopping quiz.');
+                    collector.stop()
                     resolve();
                     return;
                 }
@@ -113,6 +114,7 @@ module.exports = {
                     //stops on message 'stop'
                     if (message.content.trim().toLowerCase() === 'stop' && message.author.id === interaction.user.id) {
                         await interaction.followUp('Stopping quiz.');
+                        collector.stop()
                         resolve();
                         return;
                     }
