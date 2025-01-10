@@ -70,7 +70,7 @@ module.exports = {
                 //if they didn't use a hint, handle their answer as normal
                 if (!hintUsed) {
                     const result = fuse.search(message.content.trim());
-                    if (result.length > 0 && result[0].score < 0.4) {
+                    if (result.length > 0 && result[0].score < 0.4 && message.author.id === interaction.user.id) {
                         await message.reply('Correct!');
                         incrementQuestionCount(interaction.user.id, column); //inserts into database on column specified earlier
                         resolve();
