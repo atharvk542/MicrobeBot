@@ -12,6 +12,7 @@ module.exports = {
         .setName('dt')
         .setDescription('Gives one question to identiy the type of disease caused by a given microbe.'),
     async execute(interaction) {
+        await interaction.deferReply();
         //every time this command is run, try adding the user into the database
         //will not be added if already in database due to nature of function
         addUser(interaction.user.id);
@@ -39,7 +40,7 @@ module.exports = {
         //prepare fuse.js instance for leniency
         const fuse = new Fuse([classification], fuseOptions);
 
-        await interaction.reply(`Classify the microbe which causes this disease: **${randomDisease}**.`);
+        await interaction.editReply(`Classify the microbe which causes this disease: **${randomDisease}**.`);
 
         const collector = interaction.channel.createMessageCollector({
             time: 60000,
@@ -57,7 +58,7 @@ module.exports = {
                 }                
 
                 if (message.content.trim().toLowerCase() === 'stop' && message.author.id === interaction.user.id) {
-                    await message.reply('Stopping quiz.');
+                    await interaction.followUp('Stopping quiz.');
                     resolve();
                     return;
                 }
@@ -65,7 +66,7 @@ module.exports = {
                 //if they used a hint, update the variable so the second promise can handle their answer
                 if (message.content.trim().toLowerCase() === 'hint' && message.author.id === interaction.user.id) {
                     let firstLetter = classification[0];
-                    await message.reply(`The first letter is: **${firstLetter}**. This will not count as a solved problem.`);
+                    await interaction.followUp(`The first letter is: **${firstLetter}**. This will not count as a solved problem.`);
                     hintUsed = true;
                     resolve();
                 }
@@ -74,11 +75,11 @@ module.exports = {
                 if (!hintUsed) {
                     const result = fuse.search(message.content.trim());
                     if (result.length > 0 && result[0].score < 0.4 && message.author.id === interaction.user.id) {
-                        await message.reply('Correct!');
+                        await interaction.followUp('Correct!');
                         incrementQuestionCount(interaction.user.id, column); //inserts into database on column specified earlier
                         resolve();
                     } else {
-                        await message.reply(`Incorrect. The correct classification was **${classification}**.`);
+                        await interaction.followUp(`Incorrect. The correct classification was **${classification}**.`);
                         incrementDiseaseIncorrectCount(interaction.user.id, randomDisease);
                         resolve();
                     }
@@ -111,7 +112,7 @@ module.exports = {
                     
                     //stops on message 'stop'
                     if (message.content.trim().toLowerCase() === 'stop' && message.author.id === interaction.user.id) {
-                        await message.reply('Stopping quiz.');
+                        await interaction.followUp('Stopping quiz.');
                         resolve();
                         return;
                     }
@@ -119,10 +120,10 @@ module.exports = {
                     //checks correct or incorrect, even if they say the word 'hint' it will be incorrect
                     const result = fuse.search(message.content.trim());
                     if (result.length > 0 && result[0].score < 0.4 && message.author.id === interaction.user.id) {
-                        await message.reply('Correct!');
+                        await interaction.followUp('Correct!');
                         resolve();
                     } else {
-                        await message.reply(`Incorrect. The correct classification was **${classification}**.`);
+                        await interaction.followUp(`Incorrect. The correct classification was **${classification}**.`);
                         incrementDiseaseIncorrectCount(interaction.user.id, randomDisease);
                         resolve();
                     }

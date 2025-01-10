@@ -29,6 +29,7 @@ module.exports = {
                 .setDescription('Timer amount to identify each disease, integer amount in seconds.')
         ),
     async execute(interaction) {
+        await interaction.deferReply();
         //every time this command is run, try adding the user into the database
         //will not be added if already in database due to nature of function
         addUser(interaction.user.id);
@@ -73,7 +74,7 @@ module.exports = {
         };
 
         //send first prompt
-        await interaction.reply('Quiz started! Type "stop" to end the quiz, or type "hint" for a hint.');
+        await interaction.editReply('Quiz started! Type "stop" to end the quiz, or type "hint" for a hint.');
 
         //if this counter reaches 3, the bot automatically stops due to inactivity
         let unansweredCounter = 0;
@@ -108,7 +109,7 @@ module.exports = {
                 collector.on('collect', async message => {
 
                     if (message.content.trim().toLowerCase() === 'stop' && message.author.id === interaction.user.id) {
-                        await message.reply('Stopping quiz.');
+                        await interaction.followUp('Stopping quiz.');
                         quizActive = false;
                         const correctEmbed = correctAnswers();
                         const incorrectEmbed = incorrectAnswers();
@@ -121,7 +122,7 @@ module.exports = {
                     //if they used a hint, update the variable so the second promise can handle their answer
                     if (message.content.trim().toLowerCase() === 'hint' && message.author.id === interaction.user.id) {
                         let firstLetter = classification[0];
-                        await message.reply(`The first letter is: **${firstLetter}**. This will not count as a solved problem.`);
+                        await interaction.followUp(`The first letter is: **${firstLetter}**. This will not count as a solved problem.`);
                         hintUsed = true;
                         resolve();
                     }
@@ -130,12 +131,12 @@ module.exports = {
                     if (!hintUsed) {
                         const result = fuse.search(message.content.trim());
                         if (result.length > 0 && result[0].score < 0.4) {
-                            await message.reply('Correct!');
+                            await interaction.followUp('Correct!');
                             incrementQuestionCount(interaction.user.id, column); //inserts into database on column specified earlier
                             correctDict[randomDisease] += 1;
                             resolve();
                         } else {
-                            await message.reply(`Incorrect. The correct classification was **${classification}**.`);
+                            await interaction.followUp(`Incorrect. The correct classification was **${classification}**.`);
                             incorrectDict[randomDisease] += 1;
                             incrementDiseaseIncorrectCount(interaction.user.id, randomDisease);
                             resolve();
@@ -166,7 +167,7 @@ module.exports = {
 
                         //stops on message 'stop'
                         if (message.content.trim().toLowerCase() === 'stop' && message.author.id === interaction.user.id) {
-                            await message.reply('Stopping quiz.');
+                            await interaction.followUp('Stopping quiz.');
                             quizActive = false;
                             const correctEmbed = correctAnswers();
                             const incorrectEmbed = incorrectAnswers();
@@ -179,10 +180,10 @@ module.exports = {
                         //checks correct or incorrect, even if they say the word 'hint' it will be incorrect
                         const result = fuse.search(message.content.trim());
                         if (result.length > 0 && result[0].score < 0.4) {
-                            await message.reply('Correct!');
+                            await interaction.followUp('Correct!');
                             resolve();
                         } else {
-                            await message.reply(`Incorrect. The correct classification was **${classification}**.`);
+                            await interaction.followUp(`Incorrect. The correct classification was **${classification}**.`);
                             incorrectDict[randomDisease] += 1;
                             incrementDiseaseIncorrectCount(interaction.user.id, randomDisease);
                             resolve();

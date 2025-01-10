@@ -17,6 +17,7 @@ module.exports = {
                 .setName('timer')
                 .setDescription('Timer amount to identify each microbe, integer amount in seconds. Minimum 1, maximum 60.')),
     async execute(interaction) {
+        await interaction.deferReply();
         //every time this command is run, try adding the user into the database
         //will not be added if already in database due to nature of function
         addUser(interaction.user.id);
@@ -58,7 +59,7 @@ module.exports = {
             //prepare fuse.js instance
             const fuse = new Fuse([classification], fuseOptions);
 
-            await interaction.followUp(`Classify this microbe: **${randomMicrobe}**, you have **${timer}** seconds. Type "stop" to end the quiz.`,);
+            await interaction.editReply(`Classify this microbe: **${randomMicrobe}**, you have **${timer}** seconds. Type "stop" to end the quiz.`,);
 
             const collector = interaction.channel.createMessageCollector({
                 time: (timer * 1000), //needs to be in ms
