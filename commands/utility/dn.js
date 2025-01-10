@@ -49,7 +49,10 @@ module.exports = {
         //essentially makes it so every round, one outcome is guaranteed: either stop, timeout, or answered
         await new Promise(resolve => {
             collector.on('collect', async message => {
-
+                if (message.author.id !== interaction.user.id) {
+                    return; // Ignore messages from other users
+                }
+                
                 if (message.content.trim().toLowerCase() === 'stop' && message.author.id === interaction.user.id) {
                     await message.reply('Stopping quiz.');
                     resolve();
@@ -99,7 +102,10 @@ module.exports = {
 
             await new Promise(resolve => {
                 collector.on('collect', async message => {
-
+                    if (message.author.id !== interaction.user.id) {
+                        return; // Ignore messages from other users
+                    }
+                    
                     //stops on message 'stop'
                     if (message.content.trim().toLowerCase() === 'stop' && message.author.id === interaction.user.id) {
                         await message.reply('Stopping quiz.');
@@ -108,7 +114,7 @@ module.exports = {
                     }
 
                     //checks correct or incorrect, even if they say the word 'hint' it will be incorrect
-                    const result = fuse.search(message.content.trim());
+                    const result = fuse.search(message.content.trim()) && message.author.id === interaction.user.id;
                     if (result.length > 0 && result[0].score < 0.4) {
                         await message.reply('Correct!');
                         resolve();
