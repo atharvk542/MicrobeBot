@@ -42,7 +42,6 @@ module.exports = {
 
         const collector = interaction.channel.createMessageCollector({
             time: 60000,
-            max: 1,
         });
 
         //allows for controlling of messages if a hint is used because it is important
@@ -76,10 +75,12 @@ module.exports = {
                     if (result.length > 0 && result[0].score < 0.4 && message.author.id === interaction.user.id) {
                         await interaction.followUp('Correct!');
                         incrementQuestionCount(interaction.user.id, column); //inserts into database on column specified earlier
+                        collector.stop();
                         resolve();
                     } else {
                         await interaction.followUp(`Incorrect. The correct classification was **${classification}**.`);
                         incrementMicrobeIncorrectCount(interaction.user.id, randomMicrobe);
+                        collector.stop();
                         resolve();
                     }
                 }
@@ -89,6 +90,7 @@ module.exports = {
                 if (collected.size === 0) {
                     //closes the question stored earlier to reduce message clutter
                     await interaction.followUp('Question closed due to 60 seconds of inactivity.');
+                    collector.stop();
                     resolve();
                 }
             });
@@ -100,7 +102,6 @@ module.exports = {
             //make a new collector
             const collector = interaction.channel.createMessageCollector({
                 time: 60000,
-                max: 1,
             });
 
             await new Promise(resolve => {
@@ -112,7 +113,7 @@ module.exports = {
                     //stops on message 'stop'
                     if (message.content.trim().toLowerCase() === 'stop' && message.author.id === interaction.user.id) {
                         await interaction.followUp('Stopping quiz.');
-                        collector.stop()
+                        collector.stop();
                         resolve();
                         return;
                     }
@@ -121,10 +122,12 @@ module.exports = {
                     const result = fuse.search(message.content.trim() && message.author.id === interaction.user.id);
                     if (result.length > 0 && result[0].score < 0.4) {
                         await interaction.followUp('Correct!');
+                        collector.stop();
                         resolve();
                     } else {
                         await interaction.followUp(`Incorrect. The correct classification was **${classification}**.`);
                         incrementMicrobeIncorrectCount(interaction.user.id, randomMicrobe);
+                        collector.stop();
                         resolve();
                     }
 
@@ -133,6 +136,7 @@ module.exports = {
                 collector.on('end', async collected => {
                     if (collected.size === 0) {
                         await interaction.followUp('Question closed due to 60 seconds of inactivity.');
+                        collector.stop();
                         resolve();
                     }
                 });

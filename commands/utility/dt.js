@@ -44,7 +44,6 @@ module.exports = {
 
         const collector = interaction.channel.createMessageCollector({
             time: 60000,
-            max: 1,
         });
 
         //allows for controlling of messages if a hint is used because it is important
@@ -54,12 +53,12 @@ module.exports = {
         await new Promise(resolve => {
             collector.on('collect', async message => {
                 if (message.author.id !== interaction.user.id) {
-                    return; // Ignore messages from other users
-                }                
+                    return;
+                }
 
                 if (message.content.trim().toLowerCase() === 'stop' && message.author.id === interaction.user.id) {
                     await interaction.followUp('Stopping quiz.');
-                    collector.stop()
+                    collector.stop();
                     resolve();
                     return;
                 }
@@ -76,12 +75,14 @@ module.exports = {
                 if (!hintUsed) {
                     const result = fuse.search(message.content.trim());
                     if (result.length > 0 && result[0].score < 0.4 && message.author.id === interaction.user.id) {
-                        await interaction.followUp('Correct!');
+                        await interaction.followUp('Correct!'); 
                         incrementQuestionCount(interaction.user.id, column); //inserts into database on column specified earlier
+                        collector.stop();
                         resolve();
                     } else {
                         await interaction.followUp(`Incorrect. The correct classification was **${classification}**.`);
                         incrementDiseaseIncorrectCount(interaction.user.id, randomDisease);
+                        collector.stop();
                         resolve();
                     }
                 }
@@ -91,10 +92,12 @@ module.exports = {
                 if (collected.size === 0) {
                     //closes the question stored earlier to reduce message clutter
                     await interaction.followUp('Question closed due to 60 seconds of inactivity.');
+                    collector.stop();
                     resolve();
                 }
             });
         });
+
 
         //create an entire other promise to handle the second message if they used a hint
         if (hintUsed) {
@@ -102,19 +105,18 @@ module.exports = {
             //make a new collector
             const collector = interaction.channel.createMessageCollector({
                 time: 60000,
-                max: 1,
             });
 
             await new Promise(resolve => {
                 collector.on('collect', async message => {
                     if (message.author.id !== interaction.user.id) {
-                        return; // Ignore messages from other users
+                        return; //ignore messages from other users
                     }
-                    
+
                     //stops on message 'stop'
                     if (message.content.trim().toLowerCase() === 'stop' && message.author.id === interaction.user.id) {
                         await interaction.followUp('Stopping quiz.');
-                        collector.stop()
+                        collector.stop();
                         resolve();
                         return;
                     }
@@ -123,10 +125,12 @@ module.exports = {
                     const result = fuse.search(message.content.trim());
                     if (result.length > 0 && result[0].score < 0.4 && message.author.id === interaction.user.id) {
                         await interaction.followUp('Correct!');
+                        collector.stop();
                         resolve();
                     } else {
                         await interaction.followUp(`Incorrect. The correct classification was **${classification}**.`);
                         incrementDiseaseIncorrectCount(interaction.user.id, randomDisease);
+                        collector.stop();
                         resolve();
                     }
 
@@ -135,6 +139,7 @@ module.exports = {
                 collector.on('end', async collected => {
                     if (collected.size === 0) {
                         await interaction.followUp('Question closed due to 60 seconds of inactivity.');
+                        collector.stop();
                         resolve();
                     }
                 });
